@@ -1,0 +1,626 @@
+{
+  "version": 1,
+  "savedAt": "2026-09-16T14:17:44.261Z",
+  "salahLogs": [
+    {
+      "date": "2026-09-16",
+      "fajr": true,
+      "dhuhr": true,
+      "asr": true,
+      "maghrib": false,
+      "isha": false,
+      "tahajjud": true,
+      "duha": true,
+      "rawatib": true,
+      "notes": "Prayed Fajr in congregation; great focus during Dhuhr.",
+      "createdAt": "2026-09-16T14:17:44.069Z",
+      "updatedAt": "2026-09-16T14:17:44.069Z"
+    },
+    {
+      "date": "2026-09-15",
+      "fajr": true,
+      "dhuhr": true,
+      "asr": true,
+      "maghrib": true,
+      "isha": true,
+      "tahajjud": false,
+      "duha": true,
+      "rawatib": true,
+      "notes": "Completed all 5 on time with Rawatib sunnahs.",
+      "createdAt": "2026-09-15T14:17:44.069Z",
+      "updatedAt": "2026-09-15T14:17:44.069Z"
+    },
+    {
+      "date": "2026-09-14",
+      "fajr": true,
+      "dhuhr": true,
+      "asr": true,
+      "maghrib": true,
+      "isha": true,
+      "tahajjud": true,
+      "duha": false,
+      "rawatib": true,
+      "notes": "",
+      "createdAt": "2026-09-14T14:17:44.069Z",
+      "updatedAt": "2026-09-14T14:17:44.069Z"
+    },
+    {
+      "date": "2026-09-13",
+      "fajr": true,
+      "dhuhr": true,
+      "asr": true,
+      "maghrib": true,
+      "isha": true,
+      "tahajjud": false,
+      "duha": true,
+      "rawatib": false,
+      "notes": "",
+      "createdAt": "2026-09-13T14:17:44.069Z",
+      "updatedAt": "2026-09-13T14:17:44.069Z"
+    },
+    {
+      "date": "2026-09-12",
+      "fajr": true,
+      "dhuhr": true,
+      "asr": true,
+      "maghrib": true,
+      "isha": true,
+      "tahajjud": true,
+      "duha": true,
+      "rawatib": true,
+      "notes": "",
+      "createdAt": "2026-09-12T14:17:44.069Z",
+      "updatedAt": "2026-09-12T14:17:44.069Z"
+    },
+    {
+      "date": "2026-09-11",
+      "fajr": true,
+      "dhuhr": true,
+      "asr": true,
+      "maghrib": true,
+      "isha": true,
+      "tahajjud": false,
+      "duha": false,
+      "rawatib": true,
+      "notes": "",
+      "createdAt": "2026-09-11T14:17:44.069Z",
+      "updatedAt": "2026-09-11T14:17:44.069Z"
+    },
+    {
+      "date": "2026-09-10",
+      "fajr": true,
+      "dhuhr": true,
+      "asr": true,
+      "maghrib": true,
+      "isha": true,
+      "tahajjud": true,
+      "duha": true,
+      "rawatib": true,
+      "notes": "Friday blessed day, recited Surah Al-Kahf.",
+      "createdAt": "2026-09-10T14:17:44.069Z",
+      "updatedAt": "2026-09-10T14:17:44.069Z"
+    }
+  ],
+  "habits": [
+    {
+      "id": 1,
+      "title": "Morning Adhkar & Quran",
+      "description": "Recite morning supplications and at least 1 rub` of Quran",
+      "category": "spiritual",
+      "frequency": "daily",
+      "targetDaysPerWeek": 7,
+      "archived": false,
+      "createdAt": "2026-09-16T14:17:44.070Z",
+      "updatedAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "id": 2,
+      "title": "3 Liters of Water",
+      "description": "Stay hydrated with electrolyte-rich water",
+      "category": "health",
+      "frequency": "daily",
+      "targetDaysPerWeek": 7,
+      "archived": false,
+      "createdAt": "2026-09-16T14:17:44.070Z",
+      "updatedAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "id": 3,
+      "title": "Deep Work (2+ Hours)",
+      "description": "Uninterrupted flow state session with zero notifications",
+      "category": "intellect",
+      "frequency": "daily",
+      "targetDaysPerWeek": 6,
+      "archived": false,
+      "createdAt": "2026-09-16T14:17:44.070Z",
+      "updatedAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "id": 4,
+      "title": "Calisthenics or Cardio",
+      "description": "Minimum 30 minutes physical exertion",
+      "category": "health",
+      "frequency": "daily",
+      "targetDaysPerWeek": 5,
+      "archived": false,
+      "createdAt": "2026-09-16T14:17:44.070Z",
+      "updatedAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "id": 5,
+      "title": "Night Reflection & Witr",
+      "description": "Accountability check before sleep",
+      "category": "spiritual",
+      "frequency": "daily",
+      "targetDaysPerWeek": 7,
+      "archived": false,
+      "createdAt": "2026-09-16T14:17:44.070Z",
+      "updatedAt": "2026-09-16T14:17:44.070Z"
+    }
+  ],
+  "habitLogs": [
+    {
+      "habitId": 1,
+      "date": "2026-09-16",
+      "completed": true,
+      "value": 1,
+      "notes": "Surah Yasin read",
+      "createdAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "habitId": 2,
+      "date": "2026-09-16",
+      "completed": true,
+      "value": 3,
+      "notes": "3.2L drank",
+      "createdAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "habitId": 3,
+      "date": "2026-09-16",
+      "completed": true,
+      "value": 1,
+      "notes": "Built Mizan Storage Context",
+      "createdAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "habitId": 4,
+      "date": "2026-09-16",
+      "completed": false,
+      "value": 0,
+      "notes": "",
+      "createdAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "habitId": 5,
+      "date": "2026-09-16",
+      "completed": false,
+      "value": 0,
+      "notes": "",
+      "createdAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "habitId": 1,
+      "date": "2026-09-15",
+      "completed": true,
+      "value": 1,
+      "notes": "",
+      "createdAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "habitId": 2,
+      "date": "2026-09-15",
+      "completed": true,
+      "value": 1,
+      "notes": "",
+      "createdAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "habitId": 3,
+      "date": "2026-09-15",
+      "completed": true,
+      "value": 1,
+      "notes": "",
+      "createdAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "habitId": 4,
+      "date": "2026-09-15",
+      "completed": true,
+      "value": 1,
+      "notes": "",
+      "createdAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "habitId": 5,
+      "date": "2026-09-15",
+      "completed": true,
+      "value": 1,
+      "notes": "",
+      "createdAt": "2026-09-16T14:17:44.070Z"
+    }
+  ],
+  "workouts": [
+    {
+      "date": "2026-09-16",
+      "exerciseName": "Diamond Push-ups & Pull-ups",
+      "category": "Strength",
+      "sets": [
+        {
+          "setNumber": 1,
+          "reps": 20,
+          "weightKg": 0,
+          "rpe": 7
+        },
+        {
+          "setNumber": 2,
+          "reps": 18,
+          "weightKg": 0,
+          "rpe": 8
+        },
+        {
+          "setNumber": 3,
+          "reps": 15,
+          "weightKg": 0,
+          "rpe": 8.5
+        },
+        {
+          "setNumber": 4,
+          "reps": 12,
+          "weightKg": 0,
+          "rpe": 9
+        }
+      ],
+      "distanceKm": null,
+      "durationMinutes": 35,
+      "notes": "Focused on explosive concentric tempo and solid mind-muscle connection.",
+      "createdAt": "2026-09-16T14:17:44.070Z",
+      "updatedAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "date": "2026-09-15",
+      "exerciseName": "5K Morning Tempo Run",
+      "category": "Cardio",
+      "sets": [],
+      "distanceKm": 5.2,
+      "durationMinutes": 26,
+      "notes": "Pace: 5:00 min/km. Felt smooth throughout, heart rate stayed in Zone 3.",
+      "createdAt": "2026-09-15T14:17:44.070Z",
+      "updatedAt": "2026-09-15T14:17:44.070Z"
+    },
+    {
+      "date": "2026-09-13",
+      "exerciseName": "Kettlebell Complex (Swings & Cleans)",
+      "category": "Strength",
+      "sets": [
+        {
+          "setNumber": 1,
+          "reps": 15,
+          "weightKg": 24,
+          "rpe": 7
+        },
+        {
+          "setNumber": 2,
+          "reps": 15,
+          "weightKg": 24,
+          "rpe": 7.5
+        },
+        {
+          "setNumber": 3,
+          "reps": 15,
+          "weightKg": 24,
+          "rpe": 8
+        },
+        {
+          "setNumber": 4,
+          "reps": 15,
+          "weightKg": 24,
+          "rpe": 8.5
+        }
+      ],
+      "distanceKm": null,
+      "durationMinutes": 30,
+      "notes": "24kg kettlebell. Excellent posterior chain drive.",
+      "createdAt": "2026-09-13T14:17:44.070Z",
+      "updatedAt": "2026-09-13T14:17:44.070Z"
+    }
+  ],
+  "books": [
+    {
+      "id": 1,
+      "title": "Atomic Habits",
+      "author": "James Clear",
+      "totalPages": 320,
+      "currentPage": 215,
+      "category": "Self-Improvement",
+      "coverUrl": "",
+      "status": "reading",
+      "startedDate": "2026-09-10",
+      "finishedDate": null,
+      "rating": 5,
+      "notes": "Identity-based habits and systems over goals.",
+      "createdAt": "2026-09-16T14:17:44.070Z",
+      "updatedAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "id": 2,
+      "title": "The Sealed Nectar (Ar-Raheeq Al-Makhtum)",
+      "author": "Safiur Rahman Mubarakpuri",
+      "totalPages": 588,
+      "currentPage": 340,
+      "category": "Spiritual / Seerah",
+      "coverUrl": "",
+      "status": "reading",
+      "startedDate": "2026-09-10",
+      "finishedDate": null,
+      "rating": 5,
+      "notes": "Profound historical narrative of the life of the Prophet ﷺ.",
+      "createdAt": "2026-09-16T14:17:44.070Z",
+      "updatedAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "id": 3,
+      "title": "Deep Work: Rules for Focused Success",
+      "author": "Cal Newport",
+      "totalPages": 304,
+      "currentPage": 304,
+      "category": "Productivity",
+      "coverUrl": "",
+      "status": "finished",
+      "startedDate": "2026-09-10",
+      "finishedDate": "2026-09-15",
+      "rating": 5,
+      "notes": "Mastering the skill of deep cognitive focus.",
+      "createdAt": "2026-09-16T14:17:44.070Z",
+      "updatedAt": "2026-09-16T14:17:44.070Z"
+    }
+  ],
+  "readingLogs": [
+    {
+      "bookId": 1,
+      "date": "2026-09-16",
+      "startPage": 190,
+      "endPage": 215,
+      "pagesRead": 25,
+      "durationMinutes": 30,
+      "notes": "Read chapter on habit stacking and environmental cues.",
+      "createdAt": "2026-09-16T14:17:44.070Z",
+      "updatedAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "bookId": 2,
+      "date": "2026-09-16",
+      "startPage": 320,
+      "endPage": 340,
+      "pagesRead": 20,
+      "durationMinutes": 25,
+      "notes": "Treaty of Hudaybiyyah insights and political wisdom.",
+      "createdAt": "2026-09-16T14:17:44.070Z",
+      "updatedAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "bookId": 1,
+      "date": "2026-09-15",
+      "startPage": 165,
+      "endPage": 190,
+      "pagesRead": 25,
+      "durationMinutes": 30,
+      "notes": "The law of least effort and friction reduction.",
+      "createdAt": "2026-09-15T14:17:44.070Z",
+      "updatedAt": "2026-09-15T14:17:44.070Z"
+    }
+  ],
+  "goals": [
+    {
+      "id": 1,
+      "title": "2026 Mastery & Spiritual Balance",
+      "description": "Architect top-tier software systems while upholding spiritual, physical, and intellectual excellence.",
+      "level": "yearly",
+      "parentId": null,
+      "year": 2026,
+      "semester": null,
+      "month": null,
+      "weekNumber": null,
+      "targetDate": "2026-12-31",
+      "status": "in_progress",
+      "progress": 65,
+      "priority": "high",
+      "tags": [
+        "LifeOS",
+        "Mastery",
+        "Discipline"
+      ],
+      "createdAt": "2026-09-16T14:17:44.070Z",
+      "updatedAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "id": 2,
+      "title": "H2: Ship 3 High-Impact Web Apps & Memorize Key Surahs",
+      "description": "Focus on full-stack architecture, offline-first systems, and memorization of Surah Al-Mulk & As-Sajdah.",
+      "level": "semester",
+      "parentId": 1,
+      "year": 2026,
+      "semester": 2,
+      "month": null,
+      "weekNumber": null,
+      "targetDate": "2026-12-31",
+      "status": "in_progress",
+      "progress": 50,
+      "priority": "high",
+      "tags": [
+        "Engineering",
+        "Quran"
+      ],
+      "createdAt": "2026-09-16T14:17:44.070Z",
+      "updatedAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "id": 3,
+      "title": "Launch Mizan Life OS & Complete Strength Hypertrophy Block",
+      "description": "Ship Mizan with reactive IndexedDB, complete 15 quality workouts, and read 2 books.",
+      "level": "monthly",
+      "parentId": 2,
+      "year": 2026,
+      "semester": 2,
+      "month": 9,
+      "weekNumber": null,
+      "targetDate": "2026-09-30",
+      "status": "in_progress",
+      "progress": 60,
+      "priority": "high",
+      "tags": [
+        "Mizan",
+        "Fitness"
+      ],
+      "createdAt": "2026-09-16T14:17:44.070Z",
+      "updatedAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "id": 4,
+      "title": "Week 37: Implement Dexie Storage, Complete Shell, & Test CRUD",
+      "description": "Finalize client-side models, seed sample records, and build intuitive sidebar navigation.",
+      "level": "weekly",
+      "parentId": 3,
+      "year": 2026,
+      "semester": 2,
+      "month": 9,
+      "weekNumber": 37,
+      "targetDate": "2026-09-16",
+      "status": "in_progress",
+      "progress": 75,
+      "priority": "high",
+      "tags": [
+        "Sprint",
+        "CoreDev"
+      ],
+      "createdAt": "2026-09-16T14:17:44.070Z",
+      "updatedAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "id": 5,
+      "title": "Design and test Dexie IndexedDB schemas for all 5 domains",
+      "description": "Salah, habits, workouts, reading, planning hierarchy, and journal.",
+      "level": "daily",
+      "parentId": 4,
+      "year": 2026,
+      "semester": 2,
+      "month": 9,
+      "weekNumber": 37,
+      "targetDate": "2026-09-16",
+      "status": "completed",
+      "progress": 100,
+      "priority": "high",
+      "tags": [
+        "Database",
+        "Architecture"
+      ],
+      "createdAt": "2026-09-16T14:17:44.070Z",
+      "updatedAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "id": 6,
+      "title": "Build StorageContext with reactive hooks & seed helper",
+      "description": "Provide synchronous and reactive state management with live queries.",
+      "level": "daily",
+      "parentId": 4,
+      "year": 2026,
+      "semester": 2,
+      "month": 9,
+      "weekNumber": 37,
+      "targetDate": "2026-09-16",
+      "status": "in_progress",
+      "progress": 50,
+      "priority": "high",
+      "tags": [
+        "React",
+        "Context"
+      ],
+      "createdAt": "2026-09-16T14:17:44.070Z",
+      "updatedAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "id": 7,
+      "title": "Construct high-aesthetic Dark UI Shell with Sidebar Navigation",
+      "description": "Slate-900 palette, warm charcoal cards, emerald accents, and responsive layout.",
+      "level": "daily",
+      "parentId": 4,
+      "year": 2026,
+      "semester": 2,
+      "month": 9,
+      "weekNumber": 37,
+      "targetDate": "2026-09-16",
+      "status": "pending",
+      "progress": 0,
+      "priority": "medium",
+      "tags": [
+        "UI",
+        "Tailwind"
+      ],
+      "createdAt": "2026-09-16T14:17:44.070Z",
+      "updatedAt": "2026-09-16T14:17:44.070Z"
+    }
+  ],
+  "journalEntries": [
+    {
+      "date": "2026-09-16",
+      "mood": "great",
+      "gratitude": [
+        "Waking up early with clarity and health",
+        "Opportunity to build meaningful tools that cultivate balance (Mizan)",
+        "Peaceful environment for deep engineering focus"
+      ],
+      "wins": [
+        "Wrote clean IndexedDB schema in Dexie",
+        "Maintained all 5 daily prayers on time"
+      ],
+      "promptAnswers": {
+        "dailyFocus": "Architect the foundation of Mizan with zero compromises on quality and aesthetics.",
+        "challengeOvercome": "Structured complex 5-tier hierarchical relationships cleanly for easy client querying."
+      },
+      "content": "Today marked a powerful shift into purposeful execution. The concept of Mizan (balance) is not about perfection in every second, but about consistent calibration of body, intellect, spirit, and action.\n\nEverything built today is designed to last and run offline without latency.",
+      "tags": [
+        "Clarity",
+        "Execution",
+        "Spiritual"
+      ],
+      "createdAt": "2026-09-16T14:17:44.070Z",
+      "updatedAt": "2026-09-16T14:17:44.070Z"
+    },
+    {
+      "date": "2026-09-15",
+      "mood": "good",
+      "gratitude": [
+        "Completed 5K run in the cool morning air",
+        "Insightful takeaways from \"The Sealed Nectar\"",
+        "Good quality family time"
+      ],
+      "wins": [
+        "Finished reading Deep Work by Cal Newport",
+        "Hit all daily hydration targets"
+      ],
+      "promptAnswers": {
+        "dailyFocus": "Focus on stamina and deep concentration blocks.",
+        "challengeOvercome": "Resisted digital distractions during afternoon slump."
+      },
+      "content": "Reflected on how crucial environment design is for sustaining high output. Deep work is a muscle that must be trained daily.",
+      "tags": [
+        "Reflection",
+        "Habits"
+      ],
+      "createdAt": "2026-09-15T14:17:44.070Z",
+      "updatedAt": "2026-09-15T14:17:44.070Z"
+    }
+  ],
+  "settings": [
+    {
+      "key": "app_initialized",
+      "value": true,
+      "updatedAt": "2026-09-16T14:17:44.071Z"
+    },
+    {
+      "key": "theme",
+      "value": "dark",
+      "updatedAt": "2026-09-16T14:17:44.071Z"
+    }
+  ]
+}

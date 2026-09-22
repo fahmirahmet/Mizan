@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="bgGrad192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090d16" />
+      <stop offset="50%" stop-color="#0b1928" />
+      <stop offset="100%" stop-color="#042017" />
+    </linearGradient>
+    <linearGradient id="emeraldGrad192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <linearGradient id="goldGrad192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="192" height="192" rx="42" fill="url(#bgGrad192)" />
+  <rect width="188" height="188" x="2" y="2" rx="40" fill="none" stroke="#10b981" stroke-opacity="0.3" stroke-width="2" />
+
+  <!-- Outer Ring -->
+  <circle cx="96" cy="96" r="70" fill="none" stroke="#34d399" stroke-opacity="0.15" stroke-width="1.5" stroke-dasharray="4 3" />
+
+  <!-- Central Pivot & Mast -->
+  <circle cx="96" cy="52" r="6" fill="url(#goldGrad192)" />
+  <line x1="96" y1="58" x2="96" y2="148" stroke="url(#emeraldGrad192)" stroke-width="4.5" stroke-linecap="round" />
+  <path d="M74 148 H118" stroke="url(#emeraldGrad192)" stroke-width="4.5" stroke-linecap="round" />
+
+  <!-- Horizontal Beam -->
+  <line x1="42" y1="76" x2="150" y2="76" stroke="url(#goldGrad192)" stroke-width="4.5" stroke-linecap="round" />
+
+  <!-- Left Scale Pan -->
+  <line x1="50" y1="76" x2="35" y2="106" stroke="#34d399" stroke-width="2" stroke-opacity="0.8" />
+  <line x1="50" y1="76" x2="65" y2="106" stroke="#34d399" stroke-width="2" stroke-opacity="0.8" />
+  <path d="M28 106 Q50 124 72 106 Z" fill="url(#emeraldGrad192)" fill-opacity="0.3" stroke="url(#emeraldGrad192)" stroke-width="2.5" stroke-linejoin="round" />
+
+  <!-- Right Scale Pan -->
+  <line x1="142" y1="76" x2="127" y2="106" stroke="#34d399" stroke-width="2" stroke-opacity="0.8" />
+  <line x1="142" y1="76" x2="157" y2="106" stroke="#34d399" stroke-width="2" stroke-opacity="0.8" />
+  <path d="M120 106 Q142 124 164 106 Z" fill="url(#emeraldGrad192)" fill-opacity="0.3" stroke="url(#emeraldGrad192)" stroke-width="2.5" stroke-linejoin="round" />
+
+  <!-- Center Diamond Emblem -->
+  <polygon points="96,69 103,76 96,83 89,76" fill="url(#goldGrad192)" />
+</svg>

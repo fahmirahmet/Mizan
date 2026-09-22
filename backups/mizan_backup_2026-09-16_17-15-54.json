@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "savedAt": "2026-09-16T14:15:54.576Z",
+  "salahLogs": [
+    {
+      "date": "2026-09-16",
+      "fajr": true,
+      "dhuhr": true,
+      "asr": true,
+      "maghrib": true,
+      "isha": true,
+      "tahajjud": true,
+      "notes": "Permanent disk verified!"
+    }
+  ],
+  "habits": [
+    {
+      "id": 1,
+      "title": "Rock Solid Disk Habit",
+      "category": "spiritual",
+      "frequency": "daily",
+      "targetDaysPerWeek": 7,
+      "archived": false
+    }
+  ],
+  "habitLogs": [
+    {
+      "habitId": 1,
+      "date": "2026-09-16",
+      "completed": true,
+      "value": 1
+    }
+  ],
+  "workouts": [
+    {
+      "date": "2026-09-16",
+      "exerciseName": "Deadlifts & Pull-ups",
+      "category": "Strength",
+      "sets": [
+        {
+          "setNumber": 1,
+          "reps": 5,
+          "weightKg": 140,
+          "rpe": 8.5
+        }
+      ]
+    }
+  ],
+  "books": [
+    {
+      "id": 1,
+      "title": "Permanent Persistence Architecture",
+      "author": "Senior Engineer",
+      "totalPages": 250,
+      "currentPage": 120,
+      "status": "reading"
+    }
+  ],
+  "readingLogs": [
+    {
+      "bookId": 1,
+      "date": "2026-09-16",
+      "pagesRead": 30,
+      "durationMinutes": 25
+    }
+  ],
+  "goals": [
+    {
+      "id": 1,
+      "title": "Zero Data Loss Guarantee",
+      "level": "yearly",
+      "status": "completed",
+      "progress": 100
+    }
+  ],
+  "journalEntries": [
+    {
+      "date": "2026-09-16",
+      "mood": "great",
+      "content": "Permanent local disk persistence is active and verified.",
+      "tags": [
+        "Architecture",
+        "Persistence"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "key": "app_initialized",
+      "value": true
+    }
+  ]
+}
