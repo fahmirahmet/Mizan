@@ -7,7 +7,7 @@
     "dev": "concurrently -k -n \"SERVER,CLIENT\" -c \"cyan.bold,green.bold\" \"node server/index.js\" \"vite\"",
     "server": "node server/index.js",
     "client": "vite",
-    "build": "vite build",
+    "build": "npx --yes vite build",
     "preview": "vite preview"
   },
   "dependencies": {
