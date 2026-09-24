@@ -3,6 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { format, subDays, addDays } from 'date-fns';
 import { db } from '../db';
 import { populateSeedData } from '../utils/seedData';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import confetti from 'canvas-confetti';
 
 const StorageContext = createContext(null);
@@ -35,8 +36,8 @@ export function StorageProvider({ children }) {
   const [isInitialized, setIsInitialized] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
   
-  // Local Backend / Disk Sync State
-  const [diskSyncStatus, setDiskSyncStatus] = useState('syncing'); // 'synced' | 'syncing' | 'offline' | 'error'
+  // Cloud & Local Sync State: 'synced' | 'syncing' | 'offline' | 'error'
+  const [syncStatus, setSyncStatus] = useState(isSupabaseConfigured ? 'syncing' : 'synced');
   const [lastSavedTime, setLastSavedTime] = useState(null);
   const pendingSaveTimerRef = useRef(null);
 
@@ -61,9 +62,78 @@ export function StorageProvider({ children }) {
     }, 3500);
   };
 
-  // --- Disk Synchronization Engine ---
-  // Debounced auto-sync to local backend PC filesystem (SSOT)
-  const syncAllToDisk = async (immediate = false) => {
+  // Helper: Extract current state envelope from Dexie
+  const getCurrentStateEnvelope = async () => {
+    return {
+      version: 1,
+      savedAt: new Date().toISOString(),
+      salahLogs: await db.salahLogs.toArray().catch(() => []),
+      habits: await db.habits.toArray().catch(() => []),
+      habitLogs: await db.habitLogs.toArray().catch(() => []),
+      workouts: await db.workouts.toArray().catch(() => []),
+      books: await db.books.toArray().catch(() => []),
+      readingLogs: await db.readingLogs.toArray().catch(() => []),
+      goals: await db.goals.toArray().catch(() => []),
+      journalEntries: await db.journalEntries.toArray().catch(() => []),
+      settings: await db.settings.toArray().catch(() => [])
+    };
+  };
+
+  // Helper: Hydrate Dexie tables atomically from an envelope
+  const hydrateIndexedDB = async (data) => {
+    if (!data || typeof data !== 'object') return;
+    await db.transaction('rw', [
+      db.salahLogs,
+      db.habits,
+      db.habitLogs,
+      db.workouts,
+      db.books,
+      db.readingLogs,
+      db.goals,
+      db.journalEntries,
+      db.settings
+    ], async () => {
+      if (Array.isArray(data.salahLogs)) {
+        await db.salahLogs.clear();
+        await db.salahLogs.bulkAdd(data.salahLogs);
+      }
+      if (Array.isArray(data.habits)) {
+        await db.habits.clear();
+        await db.habits.bulkAdd(data.habits);
+      }
+      if (Array.isArray(data.habitLogs)) {
+        await db.habitLogs.clear();
+        await db.habitLogs.bulkAdd(data.habitLogs);
+      }
+      if (Array.isArray(data.workouts)) {
+        await db.workouts.clear();
+        await db.workouts.bulkAdd(data.workouts);
+      }
+      if (Array.isArray(data.books)) {
+        await db.books.clear();
+        await db.books.bulkAdd(data.books);
+      }
+      if (Array.isArray(data.readingLogs)) {
+        await db.readingLogs.clear();
+        await db.readingLogs.bulkAdd(data.readingLogs);
+      }
+      if (Array.isArray(data.goals)) {
+        await db.goals.clear();
+        await db.goals.bulkAdd(data.goals);
+      }
+      if (Array.isArray(data.journalEntries)) {
+        await db.journalEntries.clear();
+        await db.journalEntries.bulkAdd(data.journalEntries);
+      }
+      if (Array.isArray(data.settings)) {
+        await db.settings.clear();
+        await db.settings.bulkAdd(data.settings);
+      }
+    });
+  };
+
+  // --- Synchronization Engine (Supabase Cloud + 500ms Debounce + Local IndexedDB) ---
+  const syncAllToCloud = async (immediate = false) => {
     if (pendingSaveTimerRef.current) {
       clearTimeout(pendingSaveTimerRef.current);
       pendingSaveTimerRef.current = null;
@@ -71,145 +141,142 @@ export function StorageProvider({ children }) {
 
     const doSave = async () => {
       try {
-        setDiskSyncStatus('syncing');
-        const payload = {
-          salahLogs: await db.salahLogs.toArray().catch(() => []),
-          habits: await db.habits.toArray().catch(() => []),
-          habitLogs: await db.habitLogs.toArray().catch(() => []),
-          workouts: await db.workouts.toArray().catch(() => []),
-          books: await db.books.toArray().catch(() => []),
-          readingLogs: await db.readingLogs.toArray().catch(() => []),
-          goals: await db.goals.toArray().catch(() => []),
-          journalEntries: await db.journalEntries.toArray().catch(() => []),
-          settings: await db.settings.toArray().catch(() => [])
-        };
+        setSyncStatus('syncing');
+        const currentEnvelope = await getCurrentStateEnvelope();
+        const now = new Date().toISOString();
 
-        const res = await fetch('/api/save', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
+        if (isSupabaseConfigured && supabase) {
+          const { error } = await supabase
+            .from('mizan_state')
+            .upsert(
+              {
+                id: 'primary_user',
+                data: currentEnvelope,
+                updated_at: now
+              },
+              { onConflict: 'id' }
+            );
 
-        if (res.ok) {
-          const json = await res.json();
-          setDiskSyncStatus('synced');
-          setLastSavedTime(json.savedAt || new Date().toISOString());
+          if (error) {
+            console.warn('[Storage] Supabase sync error:', error.message);
+            setSyncStatus('error');
+          } else {
+            setSyncStatus('synced');
+            setLastSavedTime(now);
+          }
         } else {
-          setDiskSyncStatus('error');
+          // Supabase credentials not set or local offline mode
+          // Optionally notify local dev server if available
+          try {
+            const res = await fetch('/api/save', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(currentEnvelope)
+            });
+            if (res.ok) {
+              const json = await res.json();
+              setSyncStatus('synced');
+              setLastSavedTime(json.savedAt || now);
+              return;
+            }
+          } catch (_) {
+            // Local dev server not running (e.g. Vercel deployment)
+          }
+
+          setSyncStatus('synced');
+          setLastSavedTime(now);
         }
       } catch (err) {
-        // Backend might be offline or booting
-        console.warn('[Storage] Backend not reachable for auto-sync:', err.message);
-        setDiskSyncStatus('offline');
+        console.warn('[Storage] Auto-sync error:', err);
+        setSyncStatus('error');
       }
     };
 
     if (immediate) {
       await doSave();
     } else {
-      pendingSaveTimerRef.current = setTimeout(doSave, 350);
+      pendingSaveTimerRef.current = setTimeout(doSave, 500);
     }
   };
 
-  // Safe initialization: Disk is SSOT, Dexie is reactive cache mirror
+  // Alias for backwards compatibility
+  const syncAllToDisk = syncAllToCloud;
+
+  // Safe Initialization: Supabase is Cloud SSOT, Dexie is instant reactive cache
   useEffect(() => {
     async function initDB() {
       try {
-        setDiskSyncStatus('syncing');
-        let diskHydrated = false;
+        setSyncStatus('syncing');
+        let dataHydrated = false;
 
-        // 1. Try to fetch single source of truth from backend disk
-        try {
-          const res = await fetch('/api/data');
-          if (res.ok) {
-            const result = await res.json();
-            if (result.success && result.data && result.initialized) {
-              console.log('[Storage] Hydrating local state from permanent disk storage...');
-              const data = result.data;
-              await db.transaction('rw', [
-                db.salahLogs,
-                db.habits,
-                db.habitLogs,
-                db.workouts,
-                db.books,
-                db.readingLogs,
-                db.goals,
-                db.journalEntries,
-                db.settings
-              ], async () => {
-                if (Array.isArray(data.salahLogs)) {
-                  await db.salahLogs.clear();
-                  await db.salahLogs.bulkAdd(data.salahLogs);
-                }
-                if (Array.isArray(data.habits)) {
-                  await db.habits.clear();
-                  await db.habits.bulkAdd(data.habits);
-                }
-                if (Array.isArray(data.habitLogs)) {
-                  await db.habitLogs.clear();
-                  await db.habitLogs.bulkAdd(data.habitLogs);
-                }
-                if (Array.isArray(data.workouts)) {
-                  await db.workouts.clear();
-                  await db.workouts.bulkAdd(data.workouts);
-                }
-                if (Array.isArray(data.books)) {
-                  await db.books.clear();
-                  await db.books.bulkAdd(data.books);
-                }
-                if (Array.isArray(data.readingLogs)) {
-                  await db.readingLogs.clear();
-                  await db.readingLogs.bulkAdd(data.readingLogs);
-                }
-                if (Array.isArray(data.goals)) {
-                  await db.goals.clear();
-                  await db.goals.bulkAdd(data.goals);
-                }
-                if (Array.isArray(data.journalEntries)) {
-                  await db.journalEntries.clear();
-                  await db.journalEntries.bulkAdd(data.journalEntries);
-                }
-                if (Array.isArray(data.settings)) {
-                  await db.settings.clear();
-                  await db.settings.bulkAdd(data.settings);
-                }
-              });
-              diskHydrated = true;
-              setDiskSyncStatus('synced');
-              setLastSavedTime(result.lastSaved || new Date().toISOString());
+        // 1. Fetch data from Supabase table mizan_state where id = 'primary_user'
+        if (isSupabaseConfigured && supabase) {
+          try {
+            console.log('[Storage] Checking Supabase cloud state for primary_user...');
+            const { data: row, error } = await supabase
+              .from('mizan_state')
+              .select('data, updated_at')
+              .eq('id', 'primary_user')
+              .maybeSingle();
+
+            if (error) {
+              console.warn('[Storage] Supabase query error:', error.message);
+            } else if (row && row.data) {
+              console.log('[Storage] Hydrating local IndexedDB state from Supabase...');
+              await hydrateIndexedDB(row.data);
+              dataHydrated = true;
+              setSyncStatus('synced');
+              setLastSavedTime(row.updated_at || new Date().toISOString());
               localStorage.setItem('mizan_initialized', 'true');
-            } else if (result.empty) {
-              // Disk file is empty. Check if Dexie has existing data
-              const dexieCount = (await db.goals.count().catch(() => 0)) +
-                                 (await db.books.count().catch(() => 0)) +
-                                 (await db.salahLogs.count().catch(() => 0));
-              if (dexieCount > 0) {
-                console.log('[Storage] Local Dexie cache has data; syncing to disk SSOT...');
-                await syncAllToDisk(true);
-                diskHydrated = true;
-              }
             }
+          } catch (supaErr) {
+            console.warn('[Storage] Could not reach Supabase on startup:', supaErr.message);
           }
-        } catch (err) {
-          console.warn('[Storage] Local server not reachable on initial boot:', err.message);
-          setDiskSyncStatus('offline');
         }
 
-        // 2. If nothing on disk and nothing in Dexie, check if we need first-time demo seed
-        if (!diskHydrated) {
-          const isLocalStorageInit = localStorage.getItem('mizan_initialized');
-          const goalsCount = await db.goals.count().catch(() => 0);
-          const booksCount = await db.books.count().catch(() => 0);
-          const salahCount = await db.salahLogs.count().catch(() => 0);
+        // 2. If not hydrated from Supabase, check local dev server if running
+        if (!dataHydrated) {
+          try {
+            const res = await fetch('/api/data');
+            if (res.ok) {
+              const result = await res.json();
+              if (result.success && result.data && result.initialized) {
+                console.log('[Storage] Hydrating local state from local dev server...');
+                await hydrateIndexedDB(result.data);
+                dataHydrated = true;
+                setSyncStatus('synced');
+                setLastSavedTime(result.lastSaved || new Date().toISOString());
+                localStorage.setItem('mizan_initialized', 'true');
+              }
+            }
+          } catch (_) {
+            // Local dev server not running
+          }
+        }
 
-          if (!isLocalStorageInit && goalsCount === 0 && booksCount === 0 && salahCount === 0) {
+        // 3. Check Dexie IndexedDB cache
+        const goalsCount = await db.goals.count().catch(() => 0);
+        const booksCount = await db.books.count().catch(() => 0);
+        const salahCount = await db.salahLogs.count().catch(() => 0);
+        const dexieHasData = (goalsCount + booksCount + salahCount) > 0;
+
+        if (!dataHydrated && dexieHasData) {
+          // Local Dexie has data; upsert to Supabase if configured
+          if (isSupabaseConfigured && supabase) {
+            console.log('[Storage] Local IndexedDB has data; syncing to Supabase cloud...');
+            await syncAllToCloud(true);
+          }
+          setSyncStatus('synced');
+        } else if (!dataHydrated && !dexieHasData) {
+          // Clean install detected
+          const isLocalStorageInit = localStorage.getItem('mizan_initialized');
+          if (!isLocalStorageInit) {
             console.log('[Storage] Clean install detected. Populating initial seed data...');
             await populateSeedData(db, false);
             localStorage.setItem('mizan_initialized', 'true');
-            await syncAllToDisk(true);
-          } else {
-            setDiskSyncStatus(prev => prev === 'offline' ? 'offline' : 'synced');
+            await syncAllToCloud(true);
           }
+          setSyncStatus('synced');
         }
       } catch (err) {
         console.error('[Storage] Error during initialization:', err);
@@ -223,7 +290,7 @@ export function StorageProvider({ children }) {
     // On window unload, flush pending debounced saves immediately
     const handleBeforeUnload = () => {
       if (pendingSaveTimerRef.current) {
-        syncAllToDisk(true);
+        syncAllToCloud(true);
       }
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
@@ -367,7 +434,7 @@ export function StorageProvider({ children }) {
     }
   };
 
-  // --- CRUD Operations (Dexie + Auto Disk Persistence) ---
+  // --- CRUD Operations (Dexie + Debounced 500ms Cloud Persistence) ---
 
   // 1. Salah Operations
   const toggleSalah = async (prayerKey, dateStr = selectedDate) => {
@@ -401,7 +468,7 @@ export function StorageProvider({ children }) {
       if (newVal) {
         triggerCelebration();
       }
-      syncAllToDisk();
+      syncAllToCloud();
     } catch (err) {
       console.error('Error toggling salah:', err);
       showToast('Error updating prayer status', 'error');
@@ -428,7 +495,7 @@ export function StorageProvider({ children }) {
         updatedAt: new Date().toISOString()
       });
     }
-    syncAllToDisk();
+    syncAllToCloud();
     showToast('Prayer notes saved');
   };
 
@@ -444,7 +511,7 @@ export function StorageProvider({ children }) {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
-    syncAllToDisk();
+    syncAllToCloud();
     showToast('Habit added successfully');
     return id;
   };
@@ -454,7 +521,7 @@ export function StorageProvider({ children }) {
       ...updates,
       updatedAt: new Date().toISOString()
     });
-    syncAllToDisk();
+    syncAllToCloud();
     showToast('Habit updated');
   };
 
@@ -463,7 +530,7 @@ export function StorageProvider({ children }) {
       await db.habits.delete(id);
       await db.habitLogs.where('habitId').equals(id).delete();
     });
-    syncAllToDisk();
+    syncAllToCloud();
     showToast('Habit removed');
   };
 
@@ -494,7 +561,7 @@ export function StorageProvider({ children }) {
         });
         triggerCelebration();
       }
-      syncAllToDisk();
+      syncAllToCloud();
     } catch (err) {
       console.error('Error toggling habit:', err);
     }
@@ -514,7 +581,7 @@ export function StorageProvider({ children }) {
       updatedAt: new Date().toISOString()
     });
     triggerCelebration();
-    syncAllToDisk();
+    syncAllToCloud();
     showToast('Workout logged!');
     return id;
   };
@@ -538,13 +605,13 @@ export function StorageProvider({ children }) {
       ...updates,
       updatedAt: new Date().toISOString()
     });
-    syncAllToDisk();
+    syncAllToCloud();
     showToast('Workout updated');
   };
 
   const deleteWorkout = async (id) => {
     await db.workouts.delete(id);
-    syncAllToDisk();
+    syncAllToCloud();
     showToast('Workout deleted');
   };
 
@@ -569,7 +636,7 @@ export function StorageProvider({ children }) {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
-    syncAllToDisk();
+    syncAllToCloud();
     showToast('Book added to library');
     return id;
   };
@@ -590,7 +657,7 @@ export function StorageProvider({ children }) {
     };
 
     await db.books.update(id, payload);
-    syncAllToDisk();
+    syncAllToCloud();
     showToast('Book updated');
   };
 
@@ -630,7 +697,7 @@ export function StorageProvider({ children }) {
     });
 
     triggerCelebration();
-    syncAllToDisk();
+    syncAllToCloud();
     showToast(`Updated to page ${targetPage} (+${pagesRead} pgs)!`);
   };
 
@@ -639,7 +706,7 @@ export function StorageProvider({ children }) {
       await db.books.delete(id);
       await db.readingLogs.where('bookId').equals(id).delete();
     });
-    syncAllToDisk();
+    syncAllToCloud();
     showToast('Book deleted');
   };
 
@@ -676,7 +743,7 @@ export function StorageProvider({ children }) {
     });
 
     triggerCelebration();
-    syncAllToDisk();
+    syncAllToCloud();
     showToast(`Recorded ${pagesRead > 0 ? pagesRead : 0} pages read!`);
   };
 
@@ -705,7 +772,7 @@ export function StorageProvider({ children }) {
       await recalculateParentProgress(parentId);
     }
 
-    syncAllToDisk();
+    syncAllToCloud();
     showToast('Goal / Task added');
     return id;
   };
@@ -722,7 +789,7 @@ export function StorageProvider({ children }) {
       await recalculateParentProgress(parentId);
     }
 
-    syncAllToDisk();
+    syncAllToCloud();
     showToast('Task / Goal updated');
   };
 
@@ -734,7 +801,7 @@ export function StorageProvider({ children }) {
       await recalculateParentProgress(existing.parentId);
     }
 
-    syncAllToDisk();
+    syncAllToCloud();
     showToast('Removed');
   };
 
@@ -762,7 +829,7 @@ export function StorageProvider({ children }) {
       await recalculateParentProgress(goal.parentId);
     }
 
-    syncAllToDisk();
+    syncAllToCloud();
   };
 
   // 6. Journal Operations
@@ -788,7 +855,7 @@ export function StorageProvider({ children }) {
       });
     }
 
-    syncAllToDisk();
+    syncAllToCloud();
     if (showNotification) {
       showToast('Journal reflection saved');
     }
@@ -796,14 +863,14 @@ export function StorageProvider({ children }) {
 
   const deleteJournalEntry = async (id) => {
     await db.journalEntries.delete(id);
-    syncAllToDisk();
+    syncAllToCloud();
     showToast('Journal entry deleted');
   };
 
-  // 7. System Tools (Export / Import / Seed / Reset / Disk Backups)
+  // 7. System Tools (Export / Import / Seed / Reset / Backups)
   const seedSampleData = async () => {
     await populateSeedData(db, true);
-    await syncAllToDisk(true);
+    await syncAllToCloud(true);
     showToast('Demo seed data loaded successfully!');
   };
 
@@ -816,7 +883,8 @@ export function StorageProvider({ children }) {
       db.books,
       db.readingLogs,
       db.goals,
-      db.journalEntries
+      db.journalEntries,
+      db.settings
     ], async () => {
       await db.salahLogs.clear();
       await db.habits.clear();
@@ -826,27 +894,15 @@ export function StorageProvider({ children }) {
       await db.readingLogs.clear();
       await db.goals.clear();
       await db.journalEntries.clear();
+      await db.settings.clear();
     });
-    await syncAllToDisk(true);
-    showToast('All local data cleared', 'info');
+    await syncAllToCloud(true);
+    showToast('All local and cloud data cleared', 'info');
   };
 
   const exportDataJSON = async () => {
-    const data = {
-      version: 1,
-      exportedAt: new Date().toISOString(),
-      salahLogs: await db.salahLogs.toArray(),
-      habits: await db.habits.toArray(),
-      habitLogs: await db.habitLogs.toArray(),
-      workouts: await db.workouts.toArray(),
-      books: await db.books.toArray(),
-      readingLogs: await db.readingLogs.toArray(),
-      goals: await db.goals.toArray(),
-      journalEntries: await db.journalEntries.toArray(),
-      settings: await db.settings.toArray(),
-    };
-
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const envelope = await getCurrentStateEnvelope();
+    const blob = new Blob([JSON.stringify(envelope, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -858,52 +914,9 @@ export function StorageProvider({ children }) {
 
   const importDataJSON = async (jsonString) => {
     try {
-      const data = JSON.parse(jsonString);
-      await db.transaction('rw', [
-        db.salahLogs,
-        db.habits,
-        db.habitLogs,
-        db.workouts,
-        db.books,
-        db.readingLogs,
-        db.goals,
-        db.journalEntries,
-        db.settings
-      ], async () => {
-        if (data.salahLogs) {
-          await db.salahLogs.clear();
-          await db.salahLogs.bulkAdd(data.salahLogs);
-        }
-        if (data.habits) {
-          await db.habits.clear();
-          await db.habits.bulkAdd(data.habits);
-        }
-        if (data.habitLogs) {
-          await db.habitLogs.clear();
-          await db.habitLogs.bulkAdd(data.habitLogs);
-        }
-        if (data.workouts) {
-          await db.workouts.clear();
-          await db.workouts.bulkAdd(data.workouts);
-        }
-        if (data.books) {
-          await db.books.clear();
-          await db.books.bulkAdd(data.books);
-        }
-        if (data.readingLogs) {
-          await db.readingLogs.clear();
-          await db.readingLogs.bulkAdd(data.readingLogs);
-        }
-        if (data.goals) {
-          await db.goals.clear();
-          await db.goals.bulkAdd(data.goals);
-        }
-        if (data.journalEntries) {
-          await db.journalEntries.clear();
-          await db.journalEntries.bulkAdd(data.journalEntries);
-        }
-      });
-      await syncAllToDisk(true);
+      const data = typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
+      await hydrateIndexedDB(data);
+      await syncAllToCloud(true);
       showToast('Data restored successfully!');
     } catch (err) {
       console.error('Failed to import JSON:', err);
@@ -911,23 +924,20 @@ export function StorageProvider({ children }) {
     }
   };
 
-  // Disk Backup Operations
+  // Optional local server backups support (safe fallback for production)
   const createDiskBackup = async () => {
     try {
-      setDiskSyncStatus('syncing');
       const res = await fetch('/api/backup', { method: 'POST' });
       if (res.ok) {
         const data = await res.json();
-        setDiskSyncStatus('synced');
         showToast(`Disk backup saved: ${data.filename}`, 'success');
         return data;
-      } else {
-        showToast('Failed to create disk backup', 'error');
       }
-    } catch (err) {
-      console.error('Error creating disk backup:', err);
-      showToast('Backend offline - could not create disk backup', 'error');
+    } catch (_) {
+      // Not on local server
     }
+    // Fallback: trigger browser JSON download
+    await exportDataJSON();
     return null;
   };
 
@@ -938,15 +948,14 @@ export function StorageProvider({ children }) {
         const json = await res.json();
         return json.backups || [];
       }
-    } catch (err) {
-      console.warn('Could not fetch backups:', err.message);
+    } catch (_) {
+      // Local dev server not running
     }
     return [];
   };
 
   const restoreFromDiskBackup = async (filename) => {
     try {
-      setDiskSyncStatus('syncing');
       const res = await fetch('/api/restore', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -956,39 +965,16 @@ export function StorageProvider({ children }) {
       if (res.ok) {
         const json = await res.json();
         if (json.data) {
-          const d = json.data;
-          await db.transaction('rw', [
-            db.salahLogs,
-            db.habits,
-            db.habitLogs,
-            db.workouts,
-            db.books,
-            db.readingLogs,
-            db.goals,
-            db.journalEntries,
-            db.settings
-          ], async () => {
-            if (d.salahLogs) { await db.salahLogs.clear(); await db.salahLogs.bulkAdd(d.salahLogs); }
-            if (d.habits) { await db.habits.clear(); await db.habits.bulkAdd(d.habits); }
-            if (d.habitLogs) { await db.habitLogs.clear(); await db.habitLogs.bulkAdd(d.habitLogs); }
-            if (d.workouts) { await db.workouts.clear(); await db.workouts.bulkAdd(d.workouts); }
-            if (d.books) { await db.books.clear(); await db.books.bulkAdd(d.books); }
-            if (d.readingLogs) { await db.readingLogs.clear(); await db.readingLogs.bulkAdd(d.readingLogs); }
-            if (d.goals) { await db.goals.clear(); await db.goals.bulkAdd(d.goals); }
-            if (d.journalEntries) { await db.journalEntries.clear(); await db.journalEntries.bulkAdd(d.journalEntries); }
-            if (d.settings) { await db.settings.clear(); await db.settings.bulkAdd(d.settings); }
-          });
-          setDiskSyncStatus('synced');
-          showToast('Successfully restored from disk backup!');
+          await hydrateIndexedDB(json.data);
+          await syncAllToCloud(true);
+          showToast('Successfully restored from backup!');
           return true;
         }
       }
-      showToast('Failed to restore from disk backup', 'error');
-      return false;
     } catch (err) {
       showToast('Error restoring backup: ' + err.message, 'error');
-      return false;
     }
+    return false;
   };
 
   const fetchDiskStatus = async () => {
@@ -997,10 +983,13 @@ export function StorageProvider({ children }) {
       if (res.ok) {
         return await res.json();
       }
-    } catch (e) {
-      return { status: 'offline' };
+    } catch (_) {
+      // Not connected to local Express
     }
-    return { status: 'offline' };
+    return {
+      status: isSupabaseConfigured ? 'online' : 'offline',
+      persistence: isSupabaseConfigured ? 'supabase_cloud' : 'indexeddb'
+    };
   };
 
   // Date Navigation Helpers
@@ -1025,9 +1014,13 @@ export function StorageProvider({ children }) {
     isInitialized,
     toastMessage,
     showToast,
-    // Disk backend states
-    diskSyncStatus,
+    // Cloud & local synchronization status
+    syncStatus,
+    cloudSyncStatus: syncStatus,
+    diskSyncStatus: syncStatus, // Alias for full backwards compatibility
+    isSupabaseConfigured,
     lastSavedTime,
+    syncAllToCloud,
     syncAllToDisk,
     createDiskBackup,
     fetchDiskBackups,

@@ -34,23 +34,29 @@ export function Header({ setIsMobileOpen, onOpenQuickAdd }) {
               <Sparkles className="w-3 h-3" /> Life Balance
             </span>
 
-            {/* Disk Persistence Status Indicator */}
+            {/* Cloud & Local Persistence Status Indicator */}
             {diskSyncStatus === 'synced' && (
-              <span className="text-[11px] font-medium text-emerald-400/90 bg-emerald-950/40 border border-emerald-900/60 px-2 py-0.5 rounded-md flex items-center gap-1.5" title="All changes saved to PC disk (data/mizan_db.json)">
+              <span className="text-[11px] font-medium text-emerald-400/90 bg-emerald-950/40 border border-emerald-900/60 px-2 py-0.5 rounded-md flex items-center gap-1.5" title="All changes saved and synchronized">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                Disk Synced
+                Synced
               </span>
             )}
             {diskSyncStatus === 'syncing' && (
-              <span className="text-[11px] font-medium text-sky-400/90 bg-sky-950/40 border border-sky-900/60 px-2 py-0.5 rounded-md flex items-center gap-1.5" title="Writing changes to PC disk...">
+              <span className="text-[11px] font-medium text-sky-400/90 bg-sky-950/40 border border-sky-900/60 px-2 py-0.5 rounded-md flex items-center gap-1.5" title="Syncing changes...">
                 <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping shrink-0" />
-                Saving to Disk...
+                Syncing...
               </span>
             )}
             {diskSyncStatus === 'offline' && (
-              <span className="text-[11px] font-medium text-amber-400/90 bg-amber-950/40 border border-amber-900/60 px-2 py-0.5 rounded-md flex items-center gap-1.5" title="Local server offline - caching in IndexedDB">
+              <span className="text-[11px] font-medium text-amber-400/90 bg-amber-950/40 border border-amber-900/60 px-2 py-0.5 rounded-md flex items-center gap-1.5" title="Operating in offline IndexedDB mode">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
                 Local Cache
+              </span>
+            )}
+            {diskSyncStatus === 'error' && (
+              <span className="text-[11px] font-medium text-rose-400/90 bg-rose-950/40 border border-rose-900/60 px-2 py-0.5 rounded-md flex items-center gap-1.5" title="Sync error - local cache intact">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0" />
+                Sync Issue
               </span>
             )}
           </div>

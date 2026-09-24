@@ -36,8 +36,12 @@ export function SettingsView() {
     books,
     allGoals,
     recentJournalEntries,
+    syncStatus,
+    cloudSyncStatus,
     diskSyncStatus,
+    isSupabaseConfigured,
     lastSavedTime,
+    syncAllToCloud,
     syncAllToDisk,
     createDiskBackup,
     fetchDiskBackups,
@@ -89,10 +93,10 @@ export function SettingsView() {
 
   const handleManualSaveToDisk = async () => {
     setIsSavingDisk(true);
-    await syncAllToDisk(true);
+    await syncAllToCloud(true);
     await loadDiskInfo();
     setIsSavingDisk(false);
-    showToast('Saved all records directly to PC filesystem (data/mizan_db.json)!', 'success');
+    showToast(isSupabaseConfigured ? 'Synced all records directly to Supabase Cloud!' : 'Saved all records to local storage!', 'success');
   };
 
   const handleCreateDiskBackup = async () => {
@@ -167,14 +171,14 @@ export function SettingsView() {
   };
 
   const handleSeedClick = () => {
-    if (window.confirm('This will load realistic demo records for all modules (Salah, Habits, Workouts, Reading, 5-Tier Planner, and Journals) and persist them directly to disk. Proceed?')) {
+    if (window.confirm('This will load realistic demo records for all modules (Salah, Habits, Workouts, Reading, 5-Tier Planner, and Journals) and persist them to cloud & local storage. Proceed?')) {
       seedSampleData();
       loadDiskInfo();
     }
   };
 
   const handleResetClick = () => {
-    if (window.confirm('WARNING: Are you sure you want to erase all data in Mizan? This cannot be undone unless you have a disk backup.')) {
+    if (window.confirm('WARNING: Are you sure you want to erase all data in Mizan? This will clear local and cloud records.')) {
       resetAllData();
       loadDiskInfo();
     }
@@ -186,14 +190,16 @@ export function SettingsView() {
       <div>
         <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
           <Sliders className="w-6 h-6 text-slate-400" />
-          Data Management & Local Persistence
+          Cloud & Local Data Management
         </h1>
         <p className="text-xs sm:text-sm text-slate-400 mt-1">
-          Your life data is saved directly to your PC filesystem (<code className="text-emerald-400 bg-slate-800 px-1.5 py-0.5 rounded">data/mizan_db.json</code>) with automated daily snapshots in <code className="text-emerald-400 bg-slate-800 px-1.5 py-0.5 rounded">backups/</code>.
+          {isSupabaseConfigured 
+            ? 'Connected to 24/7 Supabase Cloud Sync with instant IndexedDB local caching.' 
+            : 'Running in instant offline IndexedDB mode. Add your Supabase credentials in .env or Vercel for 24/7 cloud sync.'}
         </p>
       </div>
 
-      {/* 1. Permanent Local Backend & Disk Persistence Card */}
+      {/* 1. Cloud & Local Persistence Card */}
       <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 border border-emerald-500/30 shadow-lg space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
           <div className="flex items-center gap-2.5">
@@ -202,63 +208,63 @@ export function SettingsView() {
             </div>
             <div>
               <h2 className="text-base font-bold text-white flex items-center gap-2">
-                Local Disk Persistence (SSOT)
+                {isSupabaseConfigured ? 'Supabase Cloud Sync (24/7)' : 'IndexedDB Offline Persistence'}
               </h2>
               <p className="text-xs text-slate-400">
-                Single Source of Truth on PC Filesystem
+                {isSupabaseConfigured ? 'Table: mizan_state (id: primary_user)' : 'Dexie IndexedDB Local Cache'}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            {diskSyncStatus === 'synced' ? (
+            {syncStatus === 'synced' ? (
               <span className="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-700/80 text-emerald-300 flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                Disk Connected & Synced
+                {isSupabaseConfigured ? 'Cloud Synced' : 'Locally Synced'}
               </span>
-            ) : diskSyncStatus === 'syncing' ? (
+            ) : syncStatus === 'syncing' ? (
               <span className="text-xs font-semibold px-3 py-1 rounded-full bg-sky-950/80 border border-sky-700/80 text-sky-300 flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping" />
-                Writing to Disk...
+                Syncing...
               </span>
             ) : (
               <span className="text-xs font-semibold px-3 py-1 rounded-full bg-amber-950/80 border border-amber-700/80 text-amber-300 flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-amber-400" />
-                IndexedDB Fallback Mode
+                Local Cache Mode
               </span>
             )}
           </div>
         </div>
 
-        {/* Disk stats grid */}
+        {/* Sync stats grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="p-3.5 rounded-xl bg-slate-800/60 border border-slate-700/60">
-            <span className="text-xs text-slate-400 block">Primary Database File</span>
-            <span className="text-xs font-mono font-bold text-emerald-300 block truncate mt-1" title={diskStatus?.dbFile || 'data/mizan_db.json'}>
-              data/mizan_db.json
+            <span className="text-xs text-slate-400 block">Cloud Provider</span>
+            <span className="text-xs font-mono font-bold text-emerald-300 block truncate mt-1">
+              {isSupabaseConfigured ? 'Supabase Cloud (PostgreSQL)' : 'Local IndexedDB'}
             </span>
             <span className="text-[11px] text-slate-400 mt-1 block">
-              {diskStatus?.sizeBytes ? `${(diskStatus.sizeBytes / 1024).toFixed(1)} KB on disk` : 'Initialized'}
+              {isSupabaseConfigured ? 'mizan_state table' : 'Offline ready'}
             </span>
           </div>
 
           <div className="p-3.5 rounded-xl bg-slate-800/60 border border-slate-700/60">
-            <span className="text-xs text-slate-400 block">Last Saved to Disk</span>
+            <span className="text-xs text-slate-400 block">Last Saved</span>
             <span className="text-xs font-bold text-slate-200 block mt-1">
-              {lastSavedTime ? format(parseISO(lastSavedTime), 'MMM d, yyyy · HH:mm:ss') : (diskStatus?.lastModified ? format(new Date(diskStatus.lastModified), 'MMM d, yyyy · HH:mm:ss') : 'Just now')}
+              {lastSavedTime ? format(parseISO(lastSavedTime), 'MMM d, yyyy · HH:mm:ss') : 'Just now'}
             </span>
             <span className="text-[11px] text-emerald-400 mt-1 block flex items-center gap-1">
-              <Check className="w-3 h-3" /> Auto-saved on every change
+              <Check className="w-3 h-3" /> Auto-synced on change (500ms debounce)
             </span>
           </div>
 
           <div className="p-3.5 rounded-xl bg-slate-800/60 border border-slate-700/60">
-            <span className="text-xs text-slate-400 block">Automated Backups</span>
-            <span className="text-lg font-bold text-indigo-400 block mt-0.5">
-              {diskBackups.length} snapshots
+            <span className="text-xs text-slate-400 block">Architecture</span>
+            <span className="text-xs font-bold text-indigo-400 block mt-1">
+              Vercel + Supabase + PWA
             </span>
             <span className="text-[11px] text-slate-400 block">
-              Saved in <code className="text-slate-300 font-mono">backups/</code> folder
+              Zero server overhead
             </span>
           </div>
         </div>
@@ -271,16 +277,15 @@ export function SettingsView() {
             className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition-all shadow-md shadow-emerald-500/20 flex items-center gap-2"
           >
             <Save className="w-4 h-4" />
-            {isSavingDisk ? 'Flushing to Disk...' : 'Force Flush to Disk Now'}
+            {isSavingDisk ? 'Syncing...' : 'Force Cloud Sync Now'}
           </button>
 
           <button
-            onClick={handleCreateDiskBackup}
-            disabled={isBackingUp}
+            onClick={exportDataJSON}
             className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs transition-all flex items-center gap-2"
           >
             <FolderArchive className="w-4 h-4 text-indigo-400" />
-            {isBackingUp ? 'Creating Backup...' : 'Create Timestamped Disk Backup'}
+            Export Full JSON Backup
           </button>
         </div>
       </div>
